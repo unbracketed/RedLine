@@ -12,12 +12,12 @@ def load_set(key, IN, **kwargs):
     r = redis.Redis()
     pipeline_redis = r.pipeline()
     count = 0
-    #batch_size = kwargs['batch_size']
     batch_size = kwargs.get('batch_size', 1000)
 
     seen = set([None])
-    for member, _ in groupby(reader(IN, delimiter='\t'),
-                            lambda x: x[0] if len(x) else None):
+    reader_files = reader(IN, delimiter='\t')
+    for member, _ in groupby(reader_files,
+    lambda x: x[0] if len(x) else None):
         if member not in seen:
             pipeline_redis.sadd(key, member.rstrip())
             count += 1
