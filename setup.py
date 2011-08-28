@@ -8,5 +8,5 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=['redis>=2.2.0'],
-    scripts=['bin/redis-import-set']
+    scripts=['bin/redis-import']
 )

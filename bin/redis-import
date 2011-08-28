@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from redis_import_tools import commands
+from redline import commands
 
 
 if __name__ == '__main__':
