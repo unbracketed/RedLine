@@ -3,7 +3,18 @@ import argparse
 import sys
 import fileinput
 
-from redline import commands
+from redline.commands import RedisImport
+
+
+def handle_subcommand(args):
+    print args
+    if args.infiles:
+        instream = fileinput.input(args.infiles)
+    else:
+        instream = sys.stdin
+
+    importer = RedisImport(**args.__dict__)
+    getattr(importer, 'load_%s' % args.cmd_name)(args.key, instream)
 
 
 if __name__ == '__main__':
@@ -11,28 +22,33 @@ if __name__ == '__main__':
             description='Tools for importing data into Redis.')
 
     parser.add_argument('-b', '--batch-size', default=10000,
-            help='number of SADD operations to send per pipeline batch')
+            help='number of items to send per pipeline batch')
 
-    #parser.add_argument('-u', '--unsorted', action="store_true",
-    #        help='indicates that the input is unsorted')
+    all_subparsers = []
 
-    parser.add_argument('cmd',
-            help='Redis command')
-    parser.add_argument('key',
-            help='name of the key for the command')
-    parser.add_argument('infiles', nargs='*', 
-            #type=argparse.FileType('r'), 
-            #default=sys.stdin,
-            metavar='FILE')
+    #Set
+    subparsers = parser.add_subparsers(dest='cmd_name')
+    parser_set = subparsers.add_parser('set')
+    parser_set.add_argument('-u', '--unsorted', action="store_true",
+           help='indicates that the input is unsorted')
+    all_subparsers.append(parser_set)
+
+    for sub in all_subparsers:
+        sub.add_argument('key',
+                help="key name")
+
+        parser.add_argument('infiles', nargs='*',
+                metavar='FILE')
+    parser_set.set_defaults(func=handle_subcommand)
+
     options = parser.parse_args()
+    options.func(options)
 
-    cmd = options.cmd
-    if cmd == 'set':
-    	print sys.argv
-        if len(sys.argv) > 3:
-            input_set = fileinput.input(sys.argv[3:])
-        else:
-            input_set = sys.stdin
-        commands.load_set(options.key, input_set, batch_size=options.batch_size)
-    elif cmd == 'list':
-        commands.load_list(options.key, sys.stdin, batch_size=options.batch_size)
+    #cmd = options.cmd
+    #if cmd == 'set':
+    #print sys.argv
+    #if len(sys.argv) > 3:
+        #input_set = fileinput.input(sys.argv[3:])
+    #else:
+        #input_set = sys.stdin
+    #commands.load_set(options.key, input_set, batch_size=options.batch_size)
