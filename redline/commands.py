@@ -15,17 +15,20 @@ class RedisImport(object):
 
     def load_set(self, key, IN, **kwargs):
         """
+
         """
         seen = set([None])
         reader_files = reader(IN, delimiter='\t')
+        reader_counter = enumerate(groupby(reader_files,
+            lambda x: x[0] if len(x) else None))
+        batch_size = self.batch_size
 
         #TODO support multiple member add for Redis 2.4+
-        for i, (member, _) in enumerate(groupby(reader_files,
-        lambda x: x[0] if len(x) else None)):
+        for i, (member, _) in reader_counter:
             if member not in seen:
                 self.pipeline.sadd(key, member.rstrip())
                 seen.add(member)
-                if not i % self.batch_size:
+                if not i % batch_size:
                     self.pipeline.execute()
         #send the last batch
         self.pipeline.execute()
@@ -34,12 +37,10 @@ class RedisImport(object):
     def load_list(self, key, IN, **kwargs):
         """
         """
-        count = 0
-
-        for line in IN:
+        batch_size = self.batch_size
+        for i, line in enumerate(IN):
             self.pipeline.rpush(key, line.rstrip())
-            count += 1
-            if not count % self.batch_size:
+            if not i % batch_size:
                 self.pipeline.execute()
         #send the last batch
         self.pipeline.execute()
@@ -56,4 +57,4 @@ class RedisImport(object):
             if not count % self.batch_size:
                 self.pipeline.execute()
         #send the last batch
-        pipeline.execute()
+        self.pipeline.execute()

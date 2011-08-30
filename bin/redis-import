@@ -25,21 +25,27 @@ if __name__ == '__main__':
             help='number of items to send per pipeline batch')
 
     all_subparsers = []
+    subparsers = parser.add_subparsers(dest='cmd_name')
+
+    def _make_subparser(name):
+        subparser = subparsers.add_parser(name)
+        all_subparsers.append(subparser)
+        return subparser
 
     #Set
-    subparsers = parser.add_subparsers(dest='cmd_name')
-    parser_set = subparsers.add_parser('set')
+    parser_set = _make_subparser('set')
     parser_set.add_argument('-u', '--unsorted', action="store_true",
            help='indicates that the input is unsorted')
-    all_subparsers.append(parser_set)
+
+    #List
+    _make_subparser('list')
 
     for sub in all_subparsers:
         sub.add_argument('key',
                 help="key name")
-
-        parser.add_argument('infiles', nargs='*',
+        sub.add_argument('infiles', nargs='*',
                 metavar='FILE')
-    parser_set.set_defaults(func=handle_subcommand)
+        sub.set_defaults(func=handle_subcommand)
 
     options = parser.parse_args()
     options.func(options)
