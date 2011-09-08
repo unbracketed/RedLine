@@ -15,7 +15,6 @@ class RedisImport(object):
 
     def load_set(self, key, IN, **kwargs):
         """
-
         """
         seen = set([None])
         reader_files = reader(IN, delimiter='\t')
