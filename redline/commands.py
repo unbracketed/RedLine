@@ -7,14 +7,18 @@ import redis
 
 
 class RedisImport(object):
+    """
+    Provides methods for importing lists of data into Redis data structures
+    """
 
     def __init__(self, **kwargs):
-    	self.redis = redis.Redis()
-    	self.pipeline = self.redis.pipeline()
-    	self.batch_size = kwargs.get('batch_size', 1000)
+        self.redis = redis.Redis()
+        self.pipeline = self.redis.pipeline()
+        self.batch_size = kwargs.get('batch_size', 1000)
 
     def load_set(self, key, IN, **kwargs):
         """
+        Load a list of input into a Redis set.
         """
         seen = set([None])
         reader_files = reader(IN, delimiter='\t')
@@ -32,9 +36,9 @@ class RedisImport(object):
         #send the last batch
         self.pipeline.execute()
 
-
     def load_list(self, key, IN, **kwargs):
         """
+        Load a list of input into a Redis list
         """
         batch_size = self.batch_size
         for i, line in enumerate(IN):
@@ -44,9 +48,9 @@ class RedisImport(object):
         #send the last batch
         self.pipeline.execute()
 
-
     def load_hash_list(IN, **kwargs):
         """
+        Load a list of dicts into Redis hashes, one dict per hash
         """
         count = 0
 
