@@ -7,7 +7,6 @@ from redline.commands import RedisImport
 
 
 def handle_subcommand(args):
-    print args
     if args.infiles:
         instream = fileinput.input(args.infiles)
     else:
@@ -49,12 +48,3 @@ if __name__ == '__main__':
 
     options = parser.parse_args()
     options.func(options)
-
-    #cmd = options.cmd
-    #if cmd == 'set':
-    #print sys.argv
-    #if len(sys.argv) > 3:
-        #input_set = fileinput.input(sys.argv[3:])
-    #else:
-        #input_set = sys.stdin
-    #commands.load_set(options.key, input_set, batch_size=options.batch_size)
